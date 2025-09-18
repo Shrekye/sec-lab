@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sec Lab - Tableau de bord</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Sec Lab</h1>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="challenges.html">Défis</a>
+      <a href="admin.html">Admin</a>
+      <a href="#" onclick="logout()">Déconnexion</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Tableau de bord</h2>
+      <div id="stats">
+        <p>Défis terminés : <span id="completed">0</span></p>
+        <p>Score total : <span id="score">0</span></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Derniers défis</h2>
+      <table id="recent-challenges">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Catégorie</th>
+            <th>Difficulté</th>
+            <th>Points</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function loadDashboard() {
+      try {
+        const statsRes = await axios.get('http://localhost:5000/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        document.getElementById('completed').textContent = '5'; 
+        document.getElementById('score').textContent = statsRes.data.totalChallenges * 10; 
+
+        const challengesRes = await axios.get('http://localhost:5000/challenges', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const challenges = challengesRes.data;
+        const tableBody = document.querySelector('#recent-challenges tbody');
+        tableBody.innerHTML = challenges.map(challenge => `
+          <tr>
+            <td>${challenge.title}</td>
+            <td>${challenge.category}</td>
+            <td>${challenge.difficulty}</td>
+            <td>${challenge.points}</td>
+            <td><span class="status">Non commencé</span></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        alert('Erreur lors du chargement du tableau de bord');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

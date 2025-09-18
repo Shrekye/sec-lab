@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sec Lab - Défis</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Sec Lab</h1>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="challenges.html">Défis</a>
+      <a href="admin.html">Admin</a>
+      <a href="#" onclick="logout()">Déconnexion</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>Liste des défis</h2>
+    <div id="challenges-list">
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function loadChallenges() {
+      try {
+        const res = await axios.get('http://localhost:5000/challenges', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const challenges = res.data;
+        const container = document.getElementById('challenges-list');
+        container.innerHTML = challenges.map(challenge => `
+          <div class="card">
+            <h3>${challenge.title}</h3>
+            <p>${challenge.description}</p>
+            <p><strong>Catégorie:</strong> ${challenge.category} | <strong>Difficulté:</strong> ${challenge.difficulty} | <strong>Points:</strong> ${challenge.points}</p>
+            <button onclick="startChallenge(${challenge.id})">Commencer le défi</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        alert('Erreur lors du chargement des défis');
+      }
+    }
+
+    function startChallenge(challengeId) {
+      alert(`Défi ${challengeId} commencé !`);
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    loadChallenges();
+  </script>
+</body>
+</html>

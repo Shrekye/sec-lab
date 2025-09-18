@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sec Lab - Admin</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Sec Lab</h1>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="challenges.html">Défis</a>
+      <a href="admin.html">Admin</a>
+      <a href="#" onclick="logout()">Déconnexion</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>Panel Admin</h2>
+
+    <div class="card">
+      <h3>Ajouter un défi</h3>
+      <form id="add-challenge-form">
+        <div>
+          <label for="title">Titre :</label>
+          <input type="text" id="title" required>
+        </div>
+        <div>
+          <label for="description">Description :</label>
+          <textarea id="description" required></textarea>
+        </div>
+        <div>
+          <label for="category">Catégorie :</label>
+          <select id="category" required>
+            <option value="Web">Web</option>
+            <option value="Cryptographie">Cryptographie</option>
+            <option value="Forensics">Forensics</option>
+            <option value="Réseau">Réseau</option>
+          </select>
+        </div>
+        <div>
+          <label for="difficulty">Difficulté :</label>
+          <select id="difficulty" required>
+            <option value="Facile">Facile</option>
+            <option value="Moyen">Moyen</option>
+            <option value="Difficile">Difficile</option>
+          </select>
+        </div>
+        <div>
+          <label for="points">Points :</label>
+          <input type="number" id="points" required>
+        </div>
+        <div>
+          <label for="solution">Solution :</label>
+          <input type="text" id="solution" required>
+        </div>
+        <button type="submit">Ajouter le défi</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Liste des défis</h3>
+      <table id="challenges-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Catégorie</th>
+            <th>Difficulté</th>
+            <th>Points</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    let isAdmin = false;
+
+    async function checkAdmin() {
+      try {
+        const res = await axios.get('http://localhost:5000/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        isAdmin = decoded.isAdmin;
+        if (!isAdmin) {
+          alert('Accès refusé : vous n\'êtes pas administrateur.');
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        alert('Erreur lors de la vérification des droits admin');
+        window.location.href = 'index.html';
+      }
+    }
+
+    async function loadChallenges() {
+      try {
+        const res = await axios.get('http://localhost:5000/challenges', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const challenges = res.data;
+        const tableBody = document.querySelector('#challenges-table tbody');
+        tableBody.innerHTML = challenges.map(challenge => `
+          <tr>
+            <td>${challenge.id}</td>
+            <td>${challenge.title}</td>
+            <td>${challenge.category}</td>
+            <td>${challenge.difficulty}</td>
+            <td>${challenge.points}</td>
+            <td>
+              <button onclick="editChallenge(${challenge.id})">Modifier</button>
+              <button onclick="deleteChallenge(${challenge.id})">Supprimer</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        alert('Erreur lors du chargement des défis');
+      }
+    }
+
+    document.getElementById('add-challenge-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const category = document.getElementById('category').value;
+      const difficulty = document.getElementById('difficulty').value;
+      const points = document.getElementById('points').value;
+      const solution = document.getElementById('solution').value;
+
+      try {
+        await axios.post('http://localhost:5000/challenges', {
+          title, description, category, difficulty, points, solution
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Défi ajouté avec succès !');
+        loadChallenges();
+        document.getElementById('add-challenge-form').reset();
+      } catch (err) {
+        alert('Erreur lors de l\'ajout du défi');
+      }
+    });
+
+    async function deleteChallenge(id) {
+      if (confirm('Voulez-vous vraiment supprimer ce défi ?')) {
+        try {
+          alert('Fonctionnalité de suppression à implémenter dans le backend.');
+        } catch (err) {
+          alert('Erreur lors de la suppression du défi');
+        }
+      }
+    }
+
+    function editChallenge(id) {
+      alert(`Fonctionnalité de modification pour le défi ${id} à implémenter.`);
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    checkAdmin();
+    loadChallenges();
+  </script>
+</body>
+</html>
