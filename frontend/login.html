@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Sec-Lab</h1>
+    <nav>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>Connexion</h2>
+      <form id="loginForm">
+        <div>
+          <input type="email" name="email" placeholder="Email" required>
+        </div>
+        <div>
+          <input type="password" name="password" placeholder="Mot de passe" required>
+        </div>
+        <button type="submit">Se connecter</button>
+      </form>
+      <p id="message"></p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        email: form.email.value,
+        password: form.password.value
+      };
+      const res = await fetch('http://192.168.1.44:5000/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if (res.status === 200) {
+        localStorage.setItem('token', json.token);
+        document.getElementById('message').innerText = 'Connexion réussie !';
+      } else {
+        document.getElementById('message').innerText = json.message;
+      }
+    };
+  </script>
+</body>
+</html>
