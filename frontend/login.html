@@ -43,11 +43,16 @@
         body: JSON.stringify(data)
       });
       const json = await res.json();
+      const messageEl = document.getElementById('message');
+
       if (res.status === 200) {
         localStorage.setItem('token', json.token);
-        document.getElementById('message').innerText = 'Connexion réussie !';
+        messageEl.innerText = 'Connexion réussie ! Redirection en cours...';
+        setTimeout(() => {
+          window.location.href = 'challenges.html';
+        }, 1500);
       } else {
-        document.getElementById('message').innerText = json.message;
+        messageEl.innerText = json.message;
       }
     };
   </script>

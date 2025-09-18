@@ -5,6 +5,8 @@ npm install bcryptjs
 npm install
 node init_db.js
 npm install express body-parser cors jsonwebtoken
+
+cd Documents/sec-lab/backend
 node server.js
 
 cd Documents/sec-lab/frontend
