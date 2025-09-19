@@ -1,0 +1,15 @@
+[Unit]
+Description=Défi Web1
+After=network.target
+
+[Service]
+Type=simple
+User=shrk
+WorkingDirectory=/home/shrk/Documents/sec-lab/challenges/web1
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

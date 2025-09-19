@@ -14,3 +14,14 @@ python3 -m http.server 8000
 ```
 
 http://localhost:8000/index.html
+
+login:
+- email: admin@example.com
+- password: admin123
+
+start chall:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now /home/shrk/Documents/sec-lab/deploy/web1.service
+```

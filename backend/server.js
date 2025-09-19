@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const { exec } = require('child_process');
 
 const app = express();
 app.use(express.json());
@@ -64,6 +65,24 @@ app.post('/challenges', authenticate, (req, res) => {
       res.status(201).json({ id: this.lastID });
     }
   );
+});
+
+app.post('/start-challenge', authenticate, (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Accès refusé' });
+  const { name } = req.body;
+  exec(`sudo systemctl start ${name}`, (error) => {
+    if (error) return res.status(500).json({ message: 'Erreur au démarrage du défi' });
+    res.json({ message: `Défi ${name} démarré` });
+  });
+});
+
+app.post('/stop-challenge', authenticate, (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Accès refusé' });
+  const { name } = req.body;
+  exec(`sudo systemctl stop ${name}`, (error) => {
+    if (error) return res.status(500).json({ message: 'Erreur à l\'arrêt du défi' });
+    res.json({ message: `Défi ${name} arrêté` });
+  });
 });
 
 app.get('/stats', authenticate, (req, res) => {

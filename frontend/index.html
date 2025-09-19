@@ -38,42 +38,38 @@
             <th>Statut</th>
           </tr>
         </thead>
-        <tbody>
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
 
   <script>
     let token = localStorage.getItem('token');
-
-    if (!token) {
-      window.location.href = 'login.html';
-    }
+    if (!token) window.location.href = 'login.html';
 
     async function loadDashboard() {
       try {
         const statsRes = await axios.get('http://localhost:5000/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        document.getElementById('completed').textContent = '5'; 
-        document.getElementById('score').textContent = statsRes.data.totalChallenges * 10; 
+        document.getElementById('completed').textContent = '5';
+        document.getElementById('score').textContent = statsRes.data.totalChallenges * 10;
 
         const challengesRes = await axios.get('http://localhost:5000/challenges', {
           headers: { Authorization: `Bearer ${token}` }
         });
         const challenges = challengesRes.data;
         const tableBody = document.querySelector('#recent-challenges tbody');
-        tableBody.innerHTML = challenges.map(challenge => `
+        tableBody.innerHTML = challenges.map(c => `
           <tr>
-            <td>${challenge.title}</td>
-            <td>${challenge.category}</td>
-            <td>${challenge.difficulty}</td>
-            <td>${challenge.points}</td>
+            <td>${c.title}</td>
+            <td>${c.category}</td>
+            <td>${c.difficulty}</td>
+            <td>${c.points}</td>
             <td><span class="status">Non commencé</span></td>
           </tr>
         `).join('');
-      } catch (err) {
+      } catch(err) {
         alert('Erreur lors du chargement du tableau de bord');
       }
     }

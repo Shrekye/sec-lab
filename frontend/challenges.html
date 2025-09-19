@@ -19,16 +19,12 @@
 
   <div class="container">
     <h2>Liste des défis</h2>
-    <div id="challenges-list">
-    </div>
+    <div id="challenges-list"></div>
   </div>
 
   <script>
     let token = localStorage.getItem('token');
-
-    if (!token) {
-      window.location.href = 'login.html';
-    }
+    if (!token) window.location.href = 'login.html';
 
     async function loadChallenges() {
       try {
@@ -37,12 +33,12 @@
         });
         const challenges = res.data;
         const container = document.getElementById('challenges-list');
-        container.innerHTML = challenges.map(challenge => `
+        container.innerHTML = challenges.map(c => `
           <div class="card">
-            <h3>${challenge.title}</h3>
-            <p>${challenge.description}</p>
-            <p><strong>Catégorie:</strong> ${challenge.category} | <strong>Difficulté:</strong> ${challenge.difficulty} | <strong>Points:</strong> ${challenge.points}</p>
-            <button onclick="startChallenge(${challenge.id})">Commencer le défi</button>
+            <h3>${c.title}</h3>
+            <p>${c.description}</p>
+            <p><strong>Catégorie:</strong> ${c.category} | <strong>Difficulté:</strong> ${c.difficulty} | <strong>Points:</strong> ${c.points}</p>
+            <button onclick="startChallenge(${c.id})">Commencer le défi</button>
           </div>
         `).join('');
       } catch (err) {
@@ -50,8 +46,15 @@
       }
     }
 
-    function startChallenge(challengeId) {
-      alert(`Défi ${challengeId} commencé !`);
+    async function startChallenge(challengeId) {
+      try {
+        const res = await axios.post('http://localhost:5000/start-challenge', {
+          name: `web${challengeId}`
+        }, { headers: { Authorization: `Bearer ${token}` } });
+        alert(res.data.message);
+      } catch(err) {
+        alert(err.response?.data?.message || 'Erreur au démarrage du défi');
+      }
     }
 
     function logout() {

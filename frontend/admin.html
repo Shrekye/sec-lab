@@ -23,14 +23,8 @@
     <div class="card">
       <h3>Ajouter un défi</h3>
       <form id="add-challenge-form">
-        <div>
-          <label for="title">Titre :</label>
-          <input type="text" id="title" required>
-        </div>
-        <div>
-          <label for="description">Description :</label>
-          <textarea id="description" required></textarea>
-        </div>
+        <div><label for="title">Titre :</label><input type="text" id="title" required></div>
+        <div><label for="description">Description :</label><textarea id="description" required></textarea></div>
         <div>
           <label for="category">Catégorie :</label>
           <select id="category" required>
@@ -48,14 +42,8 @@
             <option value="Difficile">Difficile</option>
           </select>
         </div>
-        <div>
-          <label for="points">Points :</label>
-          <input type="number" id="points" required>
-        </div>
-        <div>
-          <label for="solution">Solution :</label>
-          <input type="text" id="solution" required>
-        </div>
+        <div><label for="points">Points :</label><input type="number" id="points" required></div>
+        <div><label for="solution">Solution :</label><input type="text" id="solution" required></div>
         <button type="submit">Ajouter le défi</button>
       </form>
     </div>
@@ -73,8 +61,7 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
@@ -85,9 +72,6 @@
 
     async function checkAdmin() {
       try {
-        const res = await axios.get('http://localhost:5000/stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
         const decoded = JSON.parse(atob(token.split('.')[1]));
         isAdmin = decoded.isAdmin;
         if (!isAdmin) {
@@ -105,9 +89,8 @@
         const res = await axios.get('http://localhost:5000/challenges', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const challenges = res.data;
         const tableBody = document.querySelector('#challenges-table tbody');
-        tableBody.innerHTML = challenges.map(challenge => `
+        tableBody.innerHTML = res.data.map(challenge => `
           <tr>
             <td>${challenge.id}</td>
             <td>${challenge.title}</td>
@@ -115,6 +98,8 @@
             <td>${challenge.difficulty}</td>
             <td>${challenge.points}</td>
             <td>
+              <button onclick="startChallenge('${challenge.title}')">Start</button>
+              <button onclick="stopChallenge('${challenge.title}')">Stop</button>
               <button onclick="editChallenge(${challenge.id})">Modifier</button>
               <button onclick="deleteChallenge(${challenge.id})">Supprimer</button>
             </td>
@@ -135,9 +120,7 @@
       const solution = document.getElementById('solution').value;
 
       try {
-        await axios.post('http://localhost:5000/challenges', {
-          title, description, category, difficulty, points, solution
-        }, {
+        await axios.post('http://localhost:5000/challenges', { title, description, category, difficulty, points, solution }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert('Défi ajouté avec succès !');
@@ -148,24 +131,32 @@
       }
     });
 
-    async function deleteChallenge(id) {
-      if (confirm('Voulez-vous vraiment supprimer ce défi ?')) {
-        try {
-          alert('Fonctionnalité de suppression à implémenter dans le backend.');
-        } catch (err) {
-          alert('Erreur lors de la suppression du défi');
-        }
+    async function startChallenge(name) {
+      try {
+        const res = await axios.post('http://localhost:5000/start-challenge', { name }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert(res.data.message);
+      } catch(err) {
+        alert(err.response?.data?.message || 'Erreur au démarrage du défi');
       }
     }
 
-    function editChallenge(id) {
-      alert(`Fonctionnalité de modification pour le défi ${id} à implémenter.`);
+    async function stopChallenge(name) {
+      try {
+        const res = await axios.post('http://localhost:5000/stop-challenge', { name }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert(res.data.message);
+      } catch(err) {
+        alert(err.response?.data?.message || 'Erreur à l\'arrêt du défi');
+      }
     }
 
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = 'login.html';
-    }
+    function editChallenge(id) { alert(`Modifier le défi ${id} (à implémenter)`); }
+    function deleteChallenge(id) { alert(`Supprimer le défi ${id} (à implémenter)`); }
+
+    function logout() { localStorage.removeItem('token'); window.location.href='login.html'; }
 
     checkAdmin();
     loadChallenges();
